@@ -99,16 +99,16 @@ google.search.GimageResult.prototype.visibleUrl;
 /** @type {string} */
 google.search.GimageResult.prototype.originalContextUrl;
 
-/** @type {number} */
+/** @type {string} */
 google.search.GimageResult.prototype.width;
 
-/** @type {number} */
+/** @type {string} */
 google.search.GimageResult.prototype.height;
 
-/** @type {number} */
+/** @type {string} */
 google.search.GimageResult.prototype.tbWidth;
 
-/** @type {number} */
+/** @type {string} */
 google.search.GimageResult.prototype.tbHeight;
 
 /** @type {string} */

@@ -27,9 +27,10 @@ var main = function() {
 };
 
 var init = function() {
-  if (!window.google || !window.google.load) {
+  if (!window['google'] || !google.load) {
     // Note that !google causes ReferenceError.
     alert('Google AJAX API Loader is not loaded');
+    return;
   }
   google.load('search', '1');
   google.setOnLoadCallback(main);

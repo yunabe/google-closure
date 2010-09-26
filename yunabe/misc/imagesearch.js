@@ -10,6 +10,8 @@ yunabe.misc.GoogleImageSearch = function() {
 
   this.imageSearch_.setRestriction(google.search.ImageSearch.RESTRICT_IMAGESIZE,
                                    google.search.ImageSearch.IMAGESIZE_MEDIUM);
+  this.imageSearch_.setRestriction(google.search.Search.RESTRICT_SAFESEARCH,
+                                   google.search.Search.SAFESEARCH_OFF);
 
   this.imageSearch_.setSearchCompleteCallback(this, this.searchComplete_);
 };
