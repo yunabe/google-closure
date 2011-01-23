@@ -3,13 +3,18 @@
 <!--
 Copyright 2010 Yu Watanabe. All Rights Reserved.
 -->
+  <head><title>A demo of yunabe/ui/view_switcher.js</title></head>
   <body style="color:white;background-color:black">
+    <form method="get" action="view_switcher.html">
+      <input type="text" name="q"></input>
+      <input type="submit" value="Search"></input>
+    </form>
     <input type="button" value="Switch view" id="switch_button"></input>
     <div id="harbor" style="position:absolute;"></div>
     <div id="grid" style="position:absolute;"></div>
     <div id="list" style="position:absolute;"></div>
+    <script type="text/javascript" src="http://www.google.com/jsapi?key=XXXXXX"></script>
     <!--
-    <script type="text/javascript" src="http://www.google.com/jsapi?key=XXXXX"></script>
     <script type="text/javascript" src="http://closure-library.googlecode.com/svn/trunk/closure/goog/base.js"></script>
     <script type="text/javascript" src="../yunabe/misc/imagesearch.js"></script>
     <script type="text/javascript" src="../yunabe/ui/view_switcher.js"></script>

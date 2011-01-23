@@ -2,6 +2,7 @@ goog.require('yunabe.misc.GoogleImageSearch');
 goog.require('yunabe.ui.GridListSwitcher');
 
 goog.require('goog.ui.ToggleButton');
+goog.require('goog.Uri');
 
 /**
  * @constructor
@@ -92,8 +93,11 @@ var showImageSearchResults = function(results) {
 };
 
 var main = function() {
+  var uri = new goog.Uri(document.location.href, true);
+  
+  var query = /** @type {string} */ (uri.getParameterValue('q')) || 'ocean';
   var imageSearch = new yunabe.misc.GoogleImageSearch();
-  imageSearch.search('ocean', 15, showImageSearchResults);
+  imageSearch.search(query, 15, showImageSearchResults);
 };
 
 var init = function() {
