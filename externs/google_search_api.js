@@ -5,6 +5,12 @@
  * @see http://code.google.com/intl/ja/apis/ajaxsearch/documentation/reference.html
  */
 
+/** @type {Object} */
+google.search = {};
+
+/** @type {Object} */
+google.search.Search = {};
+
 /**
  * @param {function()} callback
  */
@@ -29,7 +35,7 @@ google.search.ImageSearch.prototype.setResultSetSize = function(switchTo) {};
 
 /**
  * @param {string} type
- * @param {Object=} opt_value
+ * @param {string=} opt_value
  */
 google.search.ImageSearch.prototype.setRestriction = function(type, opt_value) {};
 
@@ -73,9 +79,21 @@ google.search.Search.LARGE_RESULTSET;
  * @const
  * @type {string}
  */
+google.search.Search.RESTRICT_SAFESEARCH;
+
+/**
+ * @const
+ * @type {string}
+ */
+google.search.Search.SAFESEARCH_OFF;
+
+/**
+ * @const
+ * @type {string}
+ */
 google.search.ImageSearch.RESTRICT_IMAGESIZE;
 
-/** @type {Object} */
+/** @type {string} */
 google.search.ImageSearch.IMAGESIZE_MEDIUM;
 
 /** @constructor */

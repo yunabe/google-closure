@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+#
+# Copyright 2011 Yu Watanabe. All Rights Reserved.
+#
+# Please copy this into the bin directory in closure library
+# http://code.google.com/closure/library/
+
+import calcdeps
+
+import optparse
+import os
+import sys
+
+CLOSURE_PATH = os.path.expandvars('$HOME/local/closure/lib/closure/')
+COMPILER_JAR_PATH = os.path.expandvars(
+  '$HOME/local/closure/compiler/compiler.jar')
+
+def main():
+  parser = optparse.OptionParser()
+  parser.add_option('-m', '--mode',
+                    dest='mode', default='optimize',
+                    help='flatten, compile or optimize', metavar='MODE')
+  parser.add_option('-d', '--destination', dest='destination',
+                    help='destination of output', metavar='FILE')
+  parser.add_option('-p', '--path', dest='paths', action='append',
+                    help='The paths that should be traversed to build the '
+                    'dependencies.')
+  parser.add_option('-e', '--externs', dest='externs', action='append',
+                    help='The paths that should be traversed to build the '
+                    'dependencies.')
+  options, scripts = parser.parse_args()
+  error = False
+  if len(scripts) == 0:
+    print >> sys.stderr, 'No scripts specified.'
+    error = True
+  if not options.destination:
+    print >>sys.stderr, 'No destination file is specified.'
+    error = True
+
+  argv = ['calcdeps.py',
+          '-p', CLOSURE_PATH,
+          '-c', COMPILER_JAR_PATH,]
+  for path in options.paths or []:
+    argv += ['-p', path]
+  for script in scripts:
+    argv += ['-i', script,]
+
+  if options.mode == 'flatten':
+    argv += ['-o', 'script', '--output_file=' + options.destination]
+  elif options.mode == 'compile' or options.mode == 'optimize':
+    argv += ['-o', 'compiled',]
+    argv += ['-f', '--js_output_file',
+             '-f', options.destination,]
+    argv += ['-f', '--warning_level',
+             '-f', 'VERBOSE',]
+    if options.mode == 'optimize':
+      argv += ['-f', '--compilation_level',
+               '-f', 'ADVANCED_OPTIMIZATIONS',]
+    for extern in options.externs:
+      argv += ['-f', '--externs',
+               '-f', extern,]
+  else:
+    print >> sys.stderr, 'Invalid value for --output flag.'
+    error = True
+
+  if error:
+    sys.exit(1)
+  else:
+    sys.argv = argv
+    return calcdeps.main()
+
+if __name__ == '__main__':
+  main()
