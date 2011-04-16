@@ -51,12 +51,14 @@ def main():
     argv += ['-o', 'compiled',]
     argv += ['-f', '--js_output_file',
              '-f', options.destination,]
-    argv += ['-f', '--warning_level',
-             '-f', 'VERBOSE',]
+    # http://code.google.com/p/closure-compiler/wiki/Warnings
+    argv += ['-f', '--warning_level=VERBOSE',
+             '-f', '--jscomp_error=checkTypes',
+             ]
     if options.mode == 'optimize':
       argv += ['-f', '--compilation_level',
                '-f', 'ADVANCED_OPTIMIZATIONS',]
-    for extern in options.externs:
+    for extern in options.externs or []:
       argv += ['-f', '--externs',
                '-f', extern,]
   else:
