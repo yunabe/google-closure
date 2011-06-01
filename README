@@ -1,3 +1,5 @@
 ** Demo in web **
-- demo/view_switcher.js
+- demos/view_switcher.js
    http://www.yunabe.jp/demo/view_switcher.html
+- demos/group_size_visualizer.js
+   http://www.yunabe.jp/demo/group_size_visualizer.html
