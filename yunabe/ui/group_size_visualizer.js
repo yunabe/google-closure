@@ -9,13 +9,15 @@ goog.provide('yunabe.ui.GroupSizeVisualizer');
 /**
  * @constructor
  */
-yunabe.ui.Rect = function(left, top, width, height, color_min, color_max) {
+yunabe.ui.Rect = function(left, top, width, height,
+                          color_min, color_max, lightness) {
   this.left = left;
   this.top = top;
   this.width = width;
   this.height = height;
   this.color_min = color_min;
   this.color_max = color_max;
+  this.lightness = lightness;
 
   this.children = [];
   this.node = null;
@@ -25,7 +27,7 @@ yunabe.ui.Rect = function(left, top, width, height, color_min, color_max) {
 
 yunabe.ui.Rect.prototype.createSameSize = function() {
   return new yunabe.ui.Rect(this.left, this.top, this.width, this.height,
-                  this.color_min, this.color_max);
+                            this.color_min, this.color_max, this.lightness);
 };
 
 var formatFloat = function(value) {
@@ -107,7 +109,8 @@ yunabe.ui.Rect.prototype.createDiv = function(opt_parent) {
   style['height'] = Math.floor(this.height) + 'px';
   style['position'] = 'absolute';
   var color_middle = Math.floor((this.color_max + this.color_min) / 2.0);
-  style['background-color'] = 'hsla(' + color_middle + ',100%,60%,1)'
+  style['background-color'] = 'hsla(' + color_middle + ',100%,' +
+                              Math.floor(this.lightness) + '%,1)';
 
   if (this.children.length == 0) {
     style['border'] = '1px solid gray';
@@ -202,7 +205,11 @@ var splitNodeList = function(nodes, left, right) {
   return 1.0 * lsize / (lsize + rsize);
 };
 
-var divideRect = function(nodes, rect) {
+/**
+ * @param {number=} opt_direction
+ */
+var divideRect = function(nodes, rect, opt_direction) {
+  opt_direction = opt_direction || 0;
   if (nodes.length == 0) {
     show_error('divideRect: nodes.length must not be 0.');
     return null;
@@ -217,36 +224,54 @@ var divideRect = function(nodes, rect) {
   if (left.length + right.length != nodes.length) {
     show_error('Fatal bug');
   }
-  var color_border = rect.color_min + (rect.color_max - rect.color_min) * ratio;
+
+  if ((rect.width > rect.height && (opt_direction & 1) == 0) ||
+      (rect.width <= rect.height && (opt_direction & 2) == 0)) {
+    var color_border = rect.color_min + (rect.color_max - rect.color_min) * ratio;
+    var lcolor_min = rect.color_min;
+    var lcolor_max = color_border;
+    var rcolor_min = color_border;
+    var rcolor_max = rect.color_max;
+  } else {
+    var color_border = rect.color_min + (rect.color_max - rect.color_min) * (1 - ratio);
+    var lcolor_min = color_border;
+    var lcolor_max = rect.color_max;
+    var rcolor_min = rect.color_min;
+    var rcolor_max = color_border;
+  }
   if (rect.width > rect.height) {
     var lwidth = Math.floor(rect.width * ratio);
     lrect = new yunabe.ui.Rect(rect.left,
                                rect.top,
                                lwidth,
                                rect.height,
-                               rect.color_min, color_border);
+                               lcolor_min, lcolor_max,
+                               rect.lightness);
     rrect = new yunabe.ui.Rect(rect.left + lwidth,
                                rect.top,
                                rect.width - lwidth,
                                rect.height,
-                               color_border, rect.color_max);
+                               rcolor_min, rcolor_max,
+                               rect.lightness);
+    opt_direction = opt_direction ^ 1;
   } else {
     var lheight = Math.floor(rect.height * ratio);
     lrect = new yunabe.ui.Rect(rect.left,
                                rect.top,
                                rect.width,
                                lheight,
-                               rect.color_min,
-                               color_border);
+                               lcolor_min, lcolor_max,
+                               rect.lightness);
     rrect = new yunabe.ui.Rect(rect.left,
                                rect.top + lheight,
                                rect.width,
                                rect.height - lheight,
-                               color_border,
-                               rect.color_max);
+                               rcolor_min, rcolor_max,
+                               rect.lightness);
+    opt_direction = opt_direction ^ 2;
   }
-  var left_divided = divideRect(left, lrect);
-  var right_divided = divideRect(right, rrect);
+  var left_divided = divideRect(left, lrect, opt_direction);
+  var right_divided = divideRect(right, rrect, opt_direction);
   var conc = left_divided.concat(right_divided);
   if (left_divided.length + right_divided.length != conc.length) {
     show_error('Fatal.');
@@ -256,12 +281,14 @@ var divideRect = function(nodes, rect) {
 
 /**
  * @param {number=} opt_maxdepth
+ * @param {number=} opt_depth
  */
-var constructRectTree = function(node, rect, opt_maxdepth) {
+var constructRectTree = function(node, rect, opt_maxdepth, opt_depth) {
+  opt_depth = opt_depth || 1;
   rect.node = node;
   if (node.children.length == 0 ||
       (rect.width < 10 || rect.height < 10) ||
-      opt_maxdepth == 1) {
+      (opt_maxdepth && opt_maxdepth == opt_depth)) {
     return;
   }
   node.children.sort(function(x, y) {return x.size() - y.size()});
@@ -272,7 +299,7 @@ var constructRectTree = function(node, rect, opt_maxdepth) {
   }
   for (var i = 0; i < divided.length; ++i) {
     constructRectTree(divided[i][0], divided[i][1],
-                      opt_maxdepth && opt_maxdepth - 1);
+                      opt_maxdepth, opt_depth + 1);
     rect.children.push(divided[i][1]);
     divided[i][1].parent = rect;
   }
