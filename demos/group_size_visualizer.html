@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>A demo of yunabe/ui/group_size_visualizer.js</title>
+    <link rel="stylesheet" href="css/tree.css">
     <script type="text/javascript" src="group_size_visualizer_opt.js"></script>
     <script type="text/javascript" src="nodeobj.js"></script>
     <script type="text/javascript">
@@ -11,8 +12,20 @@
     </script>
   </head>
   <body onload="main()">
-    <div style="padding:5px;background-color:#fea" id="breadcrumb">
-    </div>
-    <div id="root" style="position:absolute"></div>
+    <table>
+      <tr>
+        <td colspan="2" style="background-color:red">
+          <div style="padding:5px;background-color:#fea" id="breadcrumb"></div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div style="position:relative;width:400px;height:400px" id="root">
+          </div>
+        </td>
+        <td>
+          <div id="tree-container"></div>
+        </td>
+      </tr>
   </body>
 </html>

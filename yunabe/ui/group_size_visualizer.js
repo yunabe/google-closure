@@ -6,6 +6,8 @@
 
 goog.provide('yunabe.ui.GroupSizeVisualizer');
 
+goog.require('goog.ui.tree.TreeControl');
+
 /**
  * @constructor
  */
@@ -302,5 +304,31 @@ var constructRectTree = function(node, rect, opt_maxdepth, opt_depth) {
                       opt_maxdepth, opt_depth + 1);
     rect.children.push(divided[i][1]);
     divided[i][1].parent = rect;
+  }
+};
+
+/**
+ * @param {yunabe.ui.Node} node
+ * @param {Element} container
+ */
+var createTreeControl = function(node, container) {
+  var treeConfig = goog.ui.tree.TreeControl.defaultConfig;
+  treeConfig.cleardotPath = 'images/tree/cleardot.gif';
+  var tree = new goog.ui.tree.TreeControl(node.name, treeConfig);
+  constructTreeControl(node, tree);
+  tree.render(container);
+};
+
+/**
+ * @param {yunabe.ui.Node} node
+ * @param {goog.ui.tree.TreeControl} tree
+ */
+var constructTreeControl = function(node, tree) {
+  tree.setHtml(node.name);
+  tree.setIsUserCollapsible(true);
+  for (var i = 0; i < node.children.length; ++i) {
+    var childNode = tree.getTree().createNode('');
+    tree.add(childNode);
+    constructTreeControl(node.children[i], childNode);
   }
 };
