@@ -9,6 +9,11 @@ var visualize = function(nodeObj, div) {
   constructRectTree(node, rect);
   div.appendChild(rect.createDiv());
 
+  var canvas = /** @type {HTMLCanvasElement} */ (goog.dom.getElement(
+                                                     'convas-container'));
+  if (canvas) {
+    rect.renderInCanvas(canvas);
+  }
   createTreeControl(node, goog.dom.getElement('tree-container'));
 };
 
