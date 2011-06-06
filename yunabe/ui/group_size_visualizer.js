@@ -172,7 +172,6 @@ yunabe.ui.Rect.prototype.renderSvg = function() {
   // namespace is mandatory in JavaScript.
   var svg = document.createElementNS('http://www.w3.org/2000/svg',
                                      'svg');
-  alert(svg);
   svg.setAttribute('viewbox', '0 0 ' + this.width + ' ' + this.height);
   svg.setAttribute('width', this.width + 'px');
   svg.setAttribute('height', this.height + 'px');
