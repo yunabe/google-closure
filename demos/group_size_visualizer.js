@@ -15,6 +15,12 @@ var visualize = function(nodeObj, div) {
     rect.renderInCanvas(canvas);
   }
   createTreeControl(node, goog.dom.getElement('tree-container'));
+
+  var svg_container = goog.dom.getElement('svg-container');
+  if (svg_container) {
+    var svg = rect.renderSvg();
+    svg_container.appendChild(svg);
+  }
 };
 
 goog.exportSymbol('visualize', visualize);

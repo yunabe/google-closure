@@ -160,11 +160,43 @@ yunabe.ui.Rect.prototype.renderInCanvasInternal = function(context) {
       context.fillStyle = 'hsla(' + color_middle + ',100%,' +
         Math.floor(this.lightness) + '%,1)';
       context.fillRect(this.left + 1, this.top + 1,
-                       this.width -1, this.height -1);
+                       this.width - 1, this.height - 1);
     }
   }
   for (var i = 0; i < this.children.length; ++i) {
     this.children[i].renderInCanvasInternal(context);
+  }
+};
+
+yunabe.ui.Rect.prototype.renderSvg = function() {
+  // namespace is mandatory in JavaScript.
+  var svg = document.createElementNS('http://www.w3.org/2000/svg',
+                                     'svg');
+  alert(svg);
+  svg.setAttribute('viewbox', '0 0 ' + this.width + ' ' + this.height);
+  svg.setAttribute('width', this.width + 'px');
+  svg.setAttribute('height', this.height + 'px');
+  this.renderSvgInternal(svg);
+  return svg;
+};
+
+
+yunabe.ui.Rect.prototype.renderSvgInternal = function(svg) {
+  if (this.children.length == 0) {
+    var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', this.left + 0.5);
+    rect.setAttribute('y', this.top + 0.5);
+    rect.setAttribute('width', this.width);
+    rect.setAttribute('height', this.height);
+    var color_middle = Math.floor((this.color_max + this.color_min) / 2.0);
+    var color = 'hsla(' + color_middle + ',100%,' +
+        Math.floor(this.lightness) + '%,1)';
+    rect.setAttribute('style',
+                      'fill:' + color + ';stroke:gray;stroke-width:1');
+    svg.appendChild(rect);
+  }
+  for (var i = 0; i < this.children.length; ++i) {
+    this.children[i].renderSvgInternal(svg);
   }
 };
 
