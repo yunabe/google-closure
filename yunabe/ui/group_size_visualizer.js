@@ -143,8 +143,6 @@ yunabe.ui.Rect.prototype.renderInCanvas = function(canvas) {
   var context =
     /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
   context.strokeStyle = 'gray';
-  // TODO: Canvas does not render 1px line as we expect. Fix this.
-  // http://code.anjanesh.net/2009/05/1-pixel-wide-line-parallel-to-axis-in.html
   context.lineWidth = 1;
   this.renderInCanvasInternal(context);
 };
@@ -154,13 +152,15 @@ yunabe.ui.Rect.prototype.renderInCanvas = function(canvas) {
  */
 yunabe.ui.Rect.prototype.renderInCanvasInternal = function(context) {
   if (this.children.length == 0) {
-    context.strokeRect(this.left, this.top, this.width, this.height);
+    // TODO: Understand why it works almost as I expected.
+    context.strokeRect(this.left + 0.5, this.top + 0.5,
+                       this.width, this.height);
     if (this.width > 1 && this.height > 1) {
       var color_middle = Math.floor((this.color_max + this.color_min) / 2.0);
       context.fillStyle = 'hsla(' + color_middle + ',100%,' +
         Math.floor(this.lightness) + '%,1)';
       context.fillRect(this.left + 1, this.top + 1,
-                       this.width - 1, this.height - 1);
+                       this.width - 1, this.height -1);
     }
   }
   for (var i = 0; i < this.children.length; ++i) {
