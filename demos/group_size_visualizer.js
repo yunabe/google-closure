@@ -26,13 +26,13 @@ var handleTabSelect = function(rect, e) {
                                       'height': '400',
                                       'style': 'border:1px solid black'});
     container.appendChild(canvas);
-    rect.renderInCanvas(canvas);
+    rect.renderInCanvas(/** @type {HTMLCanvasElement} */ (canvas));
   } else {
     // id == 'tab-div'
-    var div = goog.dom.createDom(
+    var root = goog.dom.createDom(
          'div', {'style': 'position:relative;width:400px;height:400px'});
-    container.appendChild(div);
-    div.appendChild(rect.createDiv());
+    container.appendChild(root);
+    root.appendChild(rect.createDiv());
   }
 };
 
