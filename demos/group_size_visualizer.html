@@ -3,11 +3,13 @@
   <head>
     <title>A demo of yunabe/ui/group_size_visualizer.js</title>
     <link rel="stylesheet" href="css/tree.css">
+    <link rel="stylesheet" href="css/tab.css">
+    <link rel="stylesheet" href="css/tabbar.css">
     <script type="text/javascript" src="group_size_visualizer_opt.js"></script>
     <script type="text/javascript" src="nodeobj.js"></script>
     <script type="text/javascript">
       var main = function() {
-        visualize(nodeObj, document.getElementById('root'));
+        visualize(nodeObj);
       };
     </script>
   </head>
@@ -20,14 +22,12 @@
       </tr>
       <tr>
         <td align="left" valign="top">
-          <!--
-          <div id="svg-container" style="width:500px;height:500px"></div>
-          -->
-          <!--
-          <canvas id="convas-container" width="400" height="400"
-                  style="border:1px solid black"></canvas>
-          -->
-          <div style="position:relative;width:400px;height:400px" id="root">
+          <div id="tabbar" class="goog-tab-bar-top">
+            <div id="tab-div" class="goog-tab">Div</div>
+            <div id="tab-canvas" class="goog-tab">Canvas</div>
+            <div id="tab-svg" class="goog-tab">SVG</div>
+          </div>
+          <div id="container">
           </div>
         </td>
         <td align="left" valign="top">
