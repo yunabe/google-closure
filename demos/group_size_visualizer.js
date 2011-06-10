@@ -17,6 +17,7 @@ var handleTabSelect = function(rect, e) {
     return;
   }
   goog.dom.removeChildren(container);
+  var start = Date.now();
   if (id == 'tab-svg') {
     var svg = rect.renderSvg();
     container.appendChild(svg);
@@ -34,6 +35,9 @@ var handleTabSelect = function(rect, e) {
     container.appendChild(root);
     root.appendChild(rect.createDiv());
   }
+  var end = Date.now();
+  goog.dom.setTextContent(goog.dom.getElement('rendering-time'),
+                          'Render: ' + (end - start) + 'ms');
 };
 
 var visualize = function(nodeObj) {
