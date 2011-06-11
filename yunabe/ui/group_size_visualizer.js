@@ -25,6 +25,10 @@ yunabe.ui.Rect = function(left, top, width, height,
   this.node = null;
   this.parent = null;
   this.div = null;
+  this.element = null;
+  this.renderType = '';
+  /** @type {yunabe.ui.Rect} */
+  this.selectedDescendant = null;
 };
 
 yunabe.ui.Rect.prototype.createSameSize = function() {
@@ -62,16 +66,9 @@ var showBreadcrumb = function(e, rect) {
   }
   div.innerHTML = names.join('/') + ' (size = ' +
       formatSize(rect.node.size()) + ')';
-  
-  var style = rect.div['style'];
-  style['border'] = '2px solid black';
-  style['z-index'] = 1;
 };
 
 var hideBreadcrumb = function(e, rect) {
-  var style = rect.div['style'];
-  style['border'] = '1px solid gray';
-  style['z-index'] = '';
 };
 
 /**
@@ -83,13 +80,43 @@ var hideBreadcrumb = function(e, rect) {
  */
 yunabe.ui.Rect.prototype.renderInDiv = function(opt_div) {
   var div = opt_div;
+  var need_clear = true;
   if (!div) {
+    need_clear = false;
     var styles = ['position:relative',
                   'width:' + this.width + 'px',
                   'height:' + this.height + 'px'];
     div = goog.dom.createDom('div', {'style': styles.join(';')});
+    goog.events.listen(div, 'click',
+                       goog.partial(goog.bind(this.handleClick, this), 'div'));
+  }
+  if (need_clear) {
+    goog.dom.removeChildren(div);
   }
   this.renderInDivInternal(div);
+  if (this.selectedDescendant) {
+    var styles = ['left:' + this.selectedDescendant.left + 'px',
+                  'top:' + this.selectedDescendant.top + 'px',
+                  'width:' + (this.selectedDescendant.width - 2) + 'px',
+                  'height:' + (this.selectedDescendant.height - 2) + 'px',
+                  'position:absolute',
+                  'border:2px solid black',
+                  'z-index:1'];
+    var frame = goog.dom.createDom('div', {'style': styles.join(';')});
+    div.appendChild(frame);
+  }
+  // Adds a transparent element to catch a click event easily.
+  // TODO: Find more sophisticated way.
+  var styles = ['left:0px',
+                'top:0px',
+                'width:' + this.width + 'px',
+                'height:' + this.height + 'px',
+                'position:absolute',
+                'z-index:2'];
+  var clickCatcher = goog.dom.createDom('div', {'style': styles.join(';')});
+  div.appendChild(clickCatcher);
+  this.element = div;
+  this.renderType = 'div';
   return div;
 };
 
@@ -134,16 +161,36 @@ yunabe.ui.Rect.prototype.renderInDivInternal = function(root) {
  */
 yunabe.ui.Rect.prototype.renderInCanvas = function(opt_canvas) {
   var canvas = opt_canvas;
+  var need_clear = true;
   if (!canvas) {
+    need_clear = false;
     canvas = goog.dom.createDom('canvas',
                                 {'width': String(this.width),
                                  'height': String(this.height)});
+    goog.events.listen(canvas, 'click',
+                       goog.partial(goog.bind(this.handleClick, this),
+                                    'canvas'));
   }
   var context =
     /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
   context.strokeStyle = 'gray';
   context.lineWidth = 1;
+  if (need_clear) {
+    context.clearRect(0, 0, this.width, this.height);
+  }
   this.renderInCanvasInternal(context);
+
+  if (this.selectedDescendant) {
+    context.strokeStyle = 'black';
+    context.lineWidth = 2;
+    context.strokeRect(this.selectedDescendant.left + 0.5,
+                       this.selectedDescendant.top + 0.5,
+                       this.selectedDescendant.width,
+                       this.selectedDescendant.height);
+  }
+
+  this.element = canvas;
+  this.renderType = 'canvas';
   return canvas;
 };
 
@@ -174,14 +221,33 @@ yunabe.ui.Rect.prototype.renderInCanvasInternal = function(context) {
  */
 yunabe.ui.Rect.prototype.renderInSvg = function(opt_svg) {
   var svg = opt_svg;
+  var need_clear = true;
   if (!svg) {
+    need_clear = false;
     // namespace is mandatory in JavaScript.
     svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewbox', '0 0 ' + this.width + ' ' + this.height);
     svg.setAttribute('width', this.width + 'px');
     svg.setAttribute('height', this.height + 'px');
+    goog.events.listen(svg, 'click',
+                       goog.partial(goog.bind(this.handleClick, this), 'svg'));
+  }
+  if (need_clear) {
+    goog.dom.removeChildren(svg); 
   }
   this.renderInSvgInternal(svg);
+  if (this.selectedDescendant) {
+    var frame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    frame.setAttribute('x', this.selectedDescendant.left + 0.5);
+    frame.setAttribute('y', this.selectedDescendant.top + 0.5);
+    frame.setAttribute('width', this.selectedDescendant.width);
+    frame.setAttribute('height', this.selectedDescendant.height);
+    frame.setAttribute('style',
+                       'fill:hsla(0,0%,0%,0);stroke:black;stroke-width:2');
+    svg.appendChild(frame);
+  }
+  this.element = svg;
+  this.renderType = 'svg';
   return svg;
 };
 
@@ -205,6 +271,51 @@ yunabe.ui.Rect.prototype.renderInSvgInternal = function(svg) {
   for (var i = 0; i < this.children.length; ++i) {
     this.children[i].renderInSvgInternal(svg);
   }
+};
+
+yunabe.ui.Rect.prototype.redraw = function() {
+  if (this.renderType == 'div') {
+    this.renderInDiv(this.element);
+  } else if (this.renderType == 'canvas') {
+    this.renderInCanvas(/** @type {HTMLCanvasElement} */ (this.element));
+  } else if (this.renderType == 'svg') {
+    this.renderInSvg(this.element);
+  }
+};
+
+/**
+ * @param {string} type one of 'canvas', 'svg' and 'div'.
+ * @param {goog.events.Event} e Click event
+ */
+yunabe.ui.Rect.prototype.handleClick = function(type, e) {
+  var x = e.offsetX;
+  var y = e.offsetY;
+  var clicked = this.getClicked(x, y);
+  if (!clicked) {
+    return;
+  }
+  this.selectedDescendant = clicked;
+  this.redraw();
+};
+
+/**
+ * @param {number} left
+ * @param {number} top
+ * @return {yunabe.ui.Rect}
+ */
+yunabe.ui.Rect.prototype.getClicked = function(left, top) {
+  if (this.children.length == 0 &&
+      this.left <= left  && left <= this.left + this.width &&
+      this.top <= top  && top <= this.top + this.height) {
+    return this;
+  }
+  for (var i = 0; i < this.children.length; ++i) {
+    var clicked = this.children[i].getClicked(left, top);
+    if (clicked) {
+      return clicked;
+    }
+  }
+  return null;
 };
 
 /**
