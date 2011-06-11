@@ -63,59 +63,38 @@ var showBreadcrumb = function(e, rect) {
   div.innerHTML = names.join('/') + ' (size = ' +
       formatSize(rect.node.size()) + ')';
   
-  var rects = [];
-  var r = rect;
-  while (r) {
-    rects.unshift(r);
-    r = r.parent;
-  }
-  for (var i = 0; i < rects.length; ++i) {
-    var style = rects[i].div['style'];
-    style['border'] = '2px solid black';
-    style['z-index'] = String(i + 1);
-  }
+  var style = rect.div['style'];
+  style['border'] = '2px solid black';
+  style['z-index'] = 1;
 };
 
 var hideBreadcrumb = function(e, rect) {
-  var rects = [];
-  var r = rect;
-  while (r) {
-    rects.unshift(r);
-    r = r.parent;
-  }
-  for (var i = 0; i < rects.length; ++i) {
-    var style = rects[i].div['style'];
-    if (i == rects.length - 1) {
-      style['border'] = '1px solid gray';
-    } else {
-      style['border'] = '';
-    }
-    style['z-index'] = '';
-  }
+  var style = rect.div['style'];
+  style['border'] = '1px solid gray';
+  style['z-index'] = '';
 };
 
 /**
- * @param {yunabe.ui.Rect=} opt_parent
+ * Renders rectangles with div.
+ * Please note that rendering slows down if root is appended
+ * to the document root before this function is called.
+ *
+ * @param {Element} root
  */
-yunabe.ui.Rect.prototype.createDiv = function(opt_parent) {
-  var div = document.createElement('div');
-  var style = div['style'];
-  if (opt_parent) {
-    style['left'] = Math.floor(this.left - opt_parent.left) + 'px';
-    style['top'] = Math.floor(this.top - opt_parent.top) + 'px';
-  } else {
+yunabe.ui.Rect.prototype.renderUsingDiv = function(root) {
+  if (this.children.length == 0) {
+    var div = document.createElement('div');
+    var style = div['style'];
     style['left'] = Math.floor(this.left) + 'px';
     style['top'] = Math.floor(this.top) + 'px';
-  }
-  style['width'] = Math.floor(this.width) + 'px';
-  style['height'] = Math.floor(this.height) + 'px';
-  style['position'] = 'absolute';
-  var color_middle = Math.floor((this.color_max + this.color_min) / 2.0);
-  style['background-color'] = 'hsla(' + color_middle + ',100%,' +
-                              Math.floor(this.lightness) + '%,1)';
-
-  if (this.children.length == 0) {
+    style['width'] = Math.floor(this.width) + 'px';
+    style['height'] = Math.floor(this.height) + 'px';
+    style['position'] = 'absolute';
+    var color_middle = Math.floor((this.color_max + this.color_min) / 2.0);
+    style['background-color'] = 'hsla(' + color_middle + ',100%,' +
+                                Math.floor(this.lightness) + '%,1)';
     style['border'] = '1px solid gray';
+    this.div = div;
     var rect = this;
     div.addEventListener('mouseover',
                          function(e) {
@@ -127,12 +106,11 @@ yunabe.ui.Rect.prototype.createDiv = function(opt_parent) {
                            hideBreadcrumb(e, rect);
                            e.stopPropagation();
                          }, false);
+    root.appendChild(div);
   }
   for (var i = 0; i < this.children.length; ++i) {
-    div.appendChild(this.children[i].createDiv(this));
+    this.children[i].renderUsingDiv(root);
   }
-  this.div = div;
-  return div;
 };
 
 /**

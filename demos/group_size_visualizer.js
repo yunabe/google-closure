@@ -26,14 +26,17 @@ var handleTabSelect = function(rect, e) {
                                     { 'width': '400',
                                       'height': '400',
                                       'style': 'border:1px solid black'});
-    container.appendChild(canvas);
     rect.renderInCanvas(/** @type {HTMLCanvasElement} */ (canvas));
+    container.appendChild(canvas);
   } else {
     // id == 'tab-div'
     var root = goog.dom.createDom(
          'div', {'style': 'position:relative;width:400px;height:400px'});
+
+    rect.renderUsingDiv(root);
+    // Note that it takes longer time to render if you append root to container
+    // before renderUsingDiv.
     container.appendChild(root);
-    root.appendChild(rect.createDiv());
   }
   var end = Date.now();
   goog.dom.setTextContent(goog.dom.getElement('rendering-time'),
