@@ -24,8 +24,7 @@ var handleTabSelect = function(rect, e) {
   } else if (id == 'tab-canvas') {
     var canvas = goog.dom.createDom('canvas',
                                     { 'width': '400',
-                                      'height': '400',
-                                      'style': 'border:1px solid black'});
+                                      'height': '400'});
     rect.renderInCanvas(/** @type {HTMLCanvasElement} */ (canvas));
     container.appendChild(canvas);
   } else {
