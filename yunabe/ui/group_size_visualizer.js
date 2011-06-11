@@ -75,13 +75,28 @@ var hideBreadcrumb = function(e, rect) {
 };
 
 /**
- * Renders rectangles with div.
+ * Renders rectangles in div.
  * Please note that rendering slows down if root is appended
  * to the document root before this function is called.
  *
- * @param {Element} root
+ * @param {Element=} opt_div
  */
-yunabe.ui.Rect.prototype.renderUsingDiv = function(root) {
+yunabe.ui.Rect.prototype.renderInDiv = function(opt_div) {
+  var div = opt_div;
+  if (!div) {
+    var styles = ['position:relative',
+                  'width:' + this.width + 'px',
+                  'height:' + this.height + 'px'];
+    div = goog.dom.createDom('div', {'style': styles.join(';')});
+  }
+  this.renderInDivInternal(div);
+  return div;
+};
+
+/**
+ * @param {Element=} root
+ */
+yunabe.ui.Rect.prototype.renderInDivInternal = function(root) {
   if (this.children.length == 0) {
     var div = document.createElement('div');
     var style = div['style'];
@@ -109,20 +124,27 @@ yunabe.ui.Rect.prototype.renderUsingDiv = function(root) {
     root.appendChild(div);
   }
   for (var i = 0; i < this.children.length; ++i) {
-    this.children[i].renderUsingDiv(root);
+    this.children[i].renderInDivInternal(root);
   }
 };
 
 /**
- * @param {HTMLCanvasElement} canvas HTMLCanvasElement is defined in
+ * @param {HTMLCanvasElement=} opt_canvas HTMLCanvasElement is defined in
  * externs/html5.js in closure compiler project.
  */
-yunabe.ui.Rect.prototype.renderInCanvas = function(canvas) {
+yunabe.ui.Rect.prototype.renderInCanvas = function(opt_canvas) {
+  var canvas = opt_canvas;
+  if (!canvas) {
+    canvas = goog.dom.createDom('canvas',
+                                {'width': String(this.width),
+                                 'height': String(this.height)});
+  }
   var context =
     /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
   context.strokeStyle = 'gray';
   context.lineWidth = 1;
   this.renderInCanvasInternal(context);
+  return canvas;
 };
 
 /**
@@ -146,19 +168,27 @@ yunabe.ui.Rect.prototype.renderInCanvasInternal = function(context) {
   }
 };
 
-yunabe.ui.Rect.prototype.renderSvg = function() {
-  // namespace is mandatory in JavaScript.
-  var svg = document.createElementNS('http://www.w3.org/2000/svg',
-                                     'svg');
-  svg.setAttribute('viewbox', '0 0 ' + this.width + ' ' + this.height);
-  svg.setAttribute('width', this.width + 'px');
-  svg.setAttribute('height', this.height + 'px');
-  this.renderSvgInternal(svg);
+/**
+ * @param {Element=} opt_svg Actually, the type of svg is SVGSVGElement but
+ *    it is not defined in closure compiler so far.
+ */
+yunabe.ui.Rect.prototype.renderInSvg = function(opt_svg) {
+  var svg = opt_svg;
+  if (!svg) {
+    // namespace is mandatory in JavaScript.
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewbox', '0 0 ' + this.width + ' ' + this.height);
+    svg.setAttribute('width', this.width + 'px');
+    svg.setAttribute('height', this.height + 'px');
+  }
+  this.renderInSvgInternal(svg);
   return svg;
 };
 
-
-yunabe.ui.Rect.prototype.renderSvgInternal = function(svg) {
+/**
+ * @param {Element} svg
+ */
+yunabe.ui.Rect.prototype.renderInSvgInternal = function(svg) {
   if (this.children.length == 0) {
     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('x', this.left + 0.5);
@@ -173,7 +203,7 @@ yunabe.ui.Rect.prototype.renderSvgInternal = function(svg) {
     svg.appendChild(rect);
   }
   for (var i = 0; i < this.children.length; ++i) {
-    this.children[i].renderSvgInternal(svg);
+    this.children[i].renderInSvgInternal(svg);
   }
 };
 

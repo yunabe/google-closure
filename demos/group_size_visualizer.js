@@ -19,22 +19,14 @@ var handleTabSelect = function(rect, e) {
   goog.dom.removeChildren(container);
   var start = Date.now();
   if (id == 'tab-svg') {
-    var svg = rect.renderSvg();
+    var svg = rect.renderInSvg();
     container.appendChild(svg);
   } else if (id == 'tab-canvas') {
-    var canvas = goog.dom.createDom('canvas',
-                                    { 'width': '400',
-                                      'height': '400'});
-    rect.renderInCanvas(/** @type {HTMLCanvasElement} */ (canvas));
+    var canvas = rect.renderInCanvas();
     container.appendChild(canvas);
   } else {
     // id == 'tab-div'
-    var root = goog.dom.createDom(
-         'div', {'style': 'position:relative;width:400px;height:400px'});
-
-    rect.renderUsingDiv(root);
-    // Note that it takes longer time to render if you append root to container
-    // before renderUsingDiv.
+    var root = rect.renderInDiv();
     container.appendChild(root);
   }
   var end = Date.now();
