@@ -545,7 +545,7 @@ yunabe.ui.Breadcrumb.prototype.decorate = function(leaf, element) {
                                     rects[i]));
     goog.dom.appendChild(element, span);
     if (i != rects.length - 1) {
-      goog.dom.appendChild(element, goog.dom.createTextNode(' > '));
+      goog.dom.appendChild(element, goog.dom.createTextNode(' \u203a '));
     }
   }
 };
