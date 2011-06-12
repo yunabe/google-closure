@@ -1,4 +1,6 @@
 // Copyright 2010 Yu Watanabe. All Rights Reserved.
+//
+// TODO: Call goog.events.unlisten before elements with listeners are removed.
 
 /**
  * @fileoverview UI component to ...
@@ -296,6 +298,10 @@ yunabe.ui.Rect.prototype.handleClick = function(type, e) {
   }
   this.selectedDescendant = clicked;
   this.redraw();
+
+  var bc = document.getElementById('breadcrumb');
+  var b = new yunabe.ui.Breadcrumb();
+  b.decorate(clicked, bc);
 };
 
 /**
@@ -514,4 +520,45 @@ var constructTreeControl = function(node, tree) {
     tree.add(childNode);
     constructTreeControl(node.children[i], childNode);
   }
+};
+
+yunabe.ui.Breadcrumb = function() {
+};
+
+/**
+ * @param {yunabe.ui.Rect} leaf
+ * @param {Element} element
+ */
+yunabe.ui.Breadcrumb.prototype.decorate = function(leaf, element) {
+  var rect = leaf;
+  var rects = [];
+  while (rect) {
+    rects.unshift(rect);
+    rect = rect.parent;
+  }
+  goog.dom.removeChildren(element);
+  for (var i = 0; i < rects.length; ++i) {
+    var span = goog.dom.createDom('span');
+    goog.dom.setTextContent(span, rects[i].node.name);
+    goog.events.listen(span, 'click',
+                       goog.partial(goog.bind(this.handleSelect, this),
+                                    rects[i]));
+    goog.dom.appendChild(element, span);
+    if (i != rects.length - 1) {
+      goog.dom.appendChild(element, goog.dom.createTextNode(' > '));
+    }
+  }
+};
+
+/**
+ * @param {yunabe.ui.Rect} rect
+ * @param {goog.events.Event} e
+ */
+yunabe.ui.Breadcrumb.prototype.handleSelect = function(rect, e) {
+  var root = rect;
+  while (root.parent) {
+    root = root.parent;
+  }
+  root.selectedDescendant = rect;
+  root.redraw();
 };
