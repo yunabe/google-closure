@@ -522,6 +522,9 @@ var constructTreeControl = function(node, tree) {
   }
 };
 
+/**
+ * @constructor
+ */
 yunabe.ui.Breadcrumb = function() {
 };
 
