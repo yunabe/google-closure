@@ -497,13 +497,54 @@ var constructRectTree = function(node, rect, opt_maxdepth, opt_depth) {
 };
 
 /**
+ * @param {string} html
+ * @param {Object=} opt_config
+ * @param {goog.dom.DomHelper=} opt_domHelper
+ * @constructor
+ * @extends {goog.ui.tree.TreeControl}
+ */
+yunabe.ui.GroupTreeControl = function(html, opt_config, opt_domHelper) {
+  goog.ui.tree.TreeControl.call(this, html, opt_config, opt_domHelper);
+};
+goog.inherits(yunabe.ui.GroupTreeControl, goog.ui.tree.TreeControl);
+
+/** @override */
+yunabe.ui.GroupTreeControl.prototype.createNode = function(html) {
+  return new yunabe.ui.GroupTreeNode(html || '', this.getConfig(),
+      this.getDomHelper());
+};
+
+/**
+ * @param {string} html
+ * @param {Object=} opt_config
+ * @param {goog.dom.DomHelper=} opt_domHelper
+ * @constructor
+ * @extends {goog.ui.tree.TreeNode}
+ */
+yunabe.ui.GroupTreeNode = function(html, opt_config, opt_domHelper) {
+  goog.ui.tree.TreeNode.call(this, html, opt_config, opt_domHelper);
+};
+goog.inherits(yunabe.ui.GroupTreeNode, goog.ui.tree.TreeNode);
+
+/**
+ * Handles a double click event.
+ * @param {!goog.events.BrowserEvent} e The browser event.
+ * @protected
+ * @suppress {underscore}
+ */
+yunabe.ui.GroupTreeNode.prototype.onClick_ = function(e) {
+  // Do we really need this?
+  goog.events.Event.preventDefault.call(this, e);
+};
+
+/**
  * @param {yunabe.ui.Node} node
  * @param {Element} container
  */
 var createTreeControl = function(node, container) {
   var treeConfig = goog.ui.tree.TreeControl.defaultConfig;
   treeConfig.cleardotPath = 'images/tree/cleardot.gif';
-  var tree = new goog.ui.tree.TreeControl(node.name, treeConfig);
+  var tree = new yunabe.ui.GroupTreeControl(node.name, treeConfig);
   constructTreeControl(node, tree);
   tree.render(container);
 };
