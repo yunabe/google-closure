@@ -332,6 +332,8 @@ yunabe.ui.Node = function(opt_parent) {
   this.children = [];
   this.name = '';
   this.parent = opt_parent || null;
+  this.rectNode = null;
+  this.treeNode = null;
 };
 
 yunabe.ui.Node.prototype.set_size = function(size) {
@@ -477,6 +479,7 @@ var divideRect = function(nodes, rect, opt_direction) {
 var constructRectTree = function(node, rect, opt_maxdepth, opt_depth) {
   opt_depth = opt_depth || 1;
   rect.node = node;
+  node.rectNode = rect;
   if (node.children.length == 0 ||
       (rect.width < 10 || rect.height < 10) ||
       (opt_maxdepth && opt_maxdepth == opt_depth)) {
@@ -505,6 +508,7 @@ var constructRectTree = function(node, rect, opt_maxdepth, opt_depth) {
  */
 yunabe.ui.GroupTreeControl = function(html, opt_config, opt_domHelper) {
   goog.ui.tree.TreeControl.call(this, html, opt_config, opt_domHelper);
+  this.node = null;
 };
 goog.inherits(yunabe.ui.GroupTreeControl, goog.ui.tree.TreeControl);
 
@@ -523,6 +527,7 @@ yunabe.ui.GroupTreeControl.prototype.createNode = function(html) {
  */
 yunabe.ui.GroupTreeNode = function(html, opt_config, opt_domHelper) {
   goog.ui.tree.TreeNode.call(this, html, opt_config, opt_domHelper);
+  this.node = null;
 };
 goog.inherits(yunabe.ui.GroupTreeNode, goog.ui.tree.TreeNode);
 
@@ -533,6 +538,19 @@ goog.inherits(yunabe.ui.GroupTreeNode, goog.ui.tree.TreeNode);
  * @suppress {underscore}
  */
 yunabe.ui.GroupTreeNode.prototype.onClick_ = function(e) {
+  var el = e.target;
+  var type = el.getAttribute('type');
+  if (type != 'expand') {
+    // el is not expand icon.
+    // c.f. goog/ui/tree/basenode.js onMouseDown.
+    var rect = this.node.rectNode;
+    var root = rect;
+    while (root.parent) {
+      root = root.parent;
+    }
+    root.selectedDescendant = rect;
+    root.redraw();    
+  }
   // Do we really need this?
   goog.events.Event.preventDefault.call(this, e);
 };
@@ -544,16 +562,18 @@ yunabe.ui.GroupTreeNode.prototype.onClick_ = function(e) {
 var createTreeControl = function(node, container) {
   var treeConfig = goog.ui.tree.TreeControl.defaultConfig;
   treeConfig.cleardotPath = 'images/tree/cleardot.gif';
-  var tree = new yunabe.ui.GroupTreeControl(node.name, treeConfig);
+  var tree = new yunabe.ui.GroupTreeControl('', treeConfig);
   constructTreeControl(node, tree);
   tree.render(container);
 };
 
 /**
  * @param {yunabe.ui.Node} node
- * @param {goog.ui.tree.TreeControl} tree
+ * @param {yunabe.ui.GroupTreeControl} tree
  */
 var constructTreeControl = function(node, tree) {
+  node.treeNode = tree;
+  tree.node = node;
   tree.setHtml(node.name);
   tree.setIsUserCollapsible(true);
   for (var i = 0; i < node.children.length; ++i) {
